@@ -27,22 +27,14 @@
     http://csrc.nist.gov/publications/fips/fips186-3/fips_186-3.pdf
 
 
-  NIST Test Vectors from:
-
-    http://point-at-infinity.org/ecc/nisttv
-    https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/ECDSA_Characteristic2.pdf
-
-
-  References:
-
+  Reference:
+  
     https://www.ietf.org/rfc/rfc4492.txt 
-    http://www.ecrypt.eu.org/ecrypt2/documents/D.SPA.20.pdf
-    https://www.ipa.go.jp/security/enc/CRYPTREC/fy15/doc/1029_report.pdf
 
 */
 
 #include <stdint.h>
-#include "ecc.h"
+#include "ecdh.h"
 
 
 /* margin for overhead needed in intermediate calculations */
