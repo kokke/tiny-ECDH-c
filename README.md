@@ -1,7 +1,7 @@
 ### Tiny ECDH in C
 
 This is a small and portable implementation of the [Elliptic-Curve Diffie-Hellman key agreement algorithm](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman) written in C.
-It is epspecially usable for generating ephemeral session key and encrypting communication symmetrically after agreement.
+It is especially usable for generating ephemeral session keys and encrypting communications symmetrically after agreement.
 
 You can choose between 10 standard NIST curves of different sizes. 5 "pseudo-random" curves and 5 Koblitz curves providing from ~80 to ~256 bits symmetrically equivalent security.  See [ecdh.h](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh.h) for clarification.
 
