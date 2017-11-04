@@ -36,8 +36,8 @@
     https://www.ietf.org/rfc/rfc4492.txt 
 */
 
-#ifndef _ECC_H__
-#define _ECC_H__
+#ifndef _ECDH_H__
+#define _ECDH_H__
 
 
 /* for size-annotated integer types: uint8_t, uint32_t etc. */
@@ -95,5 +95,5 @@ int ecdh_shared_secret(const uint8_t* private, const uint8_t* other_pub, uint8_t
 /******************************************************************************/
 
 
-#endif /* #ifndef _ECC_H__ */
+#endif /* #ifndef _ECDH_H__ */
 
