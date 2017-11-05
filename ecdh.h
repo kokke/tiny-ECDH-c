@@ -21,7 +21,7 @@
       K-409     sect409k1     192 bit
       B-409     sect409r1     192 bit
       K-571     sect571k1     256 bit
-      B-571     sect571r1
+      B-571     sect571r1     256 bit
 
 
 
