@@ -24,7 +24,7 @@ The module allocates no RAM internally and 2.1K ROM when compiled for ARM (1.4K 
 A keypair requires between 63 and 216 bytes of RAM depending on which curve you choose (i.e. how big the underlying base field is).
 
 
-It is one of the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). 
+It is the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). 
 
 
 ```C
