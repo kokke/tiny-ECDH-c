@@ -58,7 +58,7 @@
  #include <assert.h>
 #endif
 
-/* Default to constant-time operations */
+/* Use (some) constant-time operations? */
 #ifndef CONST_TIME
   #define CONST_TIME 0
 #endif
