@@ -1,6 +1,7 @@
 ### Tiny ECDH in C
 
 This is a small and portable implementation of the [Elliptic-Curve Diffie-Hellman key agreement algorithm](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman) written in C.
+
 It is especially usable for generating ephemeral session keys and encrypting communications symmetrically after agreement.
 
 You can choose between 10 standard NIST curves of different sizes. 5 "pseudo-random" curves and 5 Koblitz curves providing from ~80 to ~256 bits symmetrically equivalent security.  See [ecdh.h](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh.h) for clarification.
@@ -11,7 +12,8 @@ The API is very simple and looks like this (I am using C99 `<stdint.h>`-style an
 /* NOTE: assumes private is filled with random data before calling */
 int ecdh_generate_keys(uint8_t* public, uint8_t* private);
 
-int ecdh_shared_secret(const uint8_t* private, const uint8_t* other_pub, uint8_t* output);
+/* input: own private key + other party's public key, output: shared secret */
+int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_t* output);
 ```
 
 You need to provide random data for the private key yourself, for the key generation process.
