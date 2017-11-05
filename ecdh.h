@@ -88,7 +88,7 @@
 
 
 int ecdh_generate_keys(uint8_t* public, uint8_t* private);
-int ecdh_shared_secret(const uint8_t* private, const uint8_t* other_pub, uint8_t* output);
+int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_t* output);
 
 
 
