@@ -21,13 +21,14 @@ See [ecdh_example.c](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh_examp
 There is no built-in error checking or protection from out-of-bounds memory access errors as a result of malicious input. The two functions ecdh_shared_secret() and ecdh_generate_keys() expect inputs of a certain length. See [ecdh.h](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh.h) for clarification.
 
 The module allocates no RAM internally and 2.1K ROM when compiled for ARM (1.4K for Thumb but YMMV).
-A keypair requires between 63 and 216 bytes of RAM repending on which curve you choose (how big the underlying base field is).
+A keypair requires between 63 and 216 bytes of RAM depending on which curve you choose (i.e. how big the underlying base field is).
 
 
 It is one of the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). 
 
 
 ```C
+$ arm-none-eabi-gcc -Os -c ecdh.c -mthumb
 $ size ecdh.o
    text    data     bss     dec     hex filename
    1413       0       0    1413     585 ecdh.o
