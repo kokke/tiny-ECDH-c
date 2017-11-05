@@ -23,7 +23,15 @@ There is no built-in error checking or protection from out-of-bounds memory acce
 The module allocates no RAM internally and 2.1K ROM when compiled for ARM (1.4K for Thumb but YMMV).
 A keypair requires between 63 and 216 bytes of RAM repending on which curve you choose (how big the underlying base field is).
 
+
 It is one of the smallest implementation in C I've seen yet, but do contact me if you know of something smaller (or have improvements to the code here). 
+
+
+```C
+$ size ecdh.o
+   text    data     bss     dec     hex filename
+   1413       0       0    1413     585 ecdh.o
+```
 
 I am using the Free Software Foundation, ARM GCC compiler:
 
