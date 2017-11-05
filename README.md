@@ -1,4 +1,4 @@
-### Tiny ECDH in C
+### Tiny ECDH / ECC in C
 
 This is a small and portable implementation of the [Elliptic-Curve Diffie-Hellman key agreement algorithm](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman) written in C.
 
