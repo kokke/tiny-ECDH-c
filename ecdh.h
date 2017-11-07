@@ -86,8 +86,10 @@
 /******************************************************************************/
 
 
-
+/* NOTE: assumes private is filled with random data before calling */
 int ecdh_generate_keys(uint8_t* public, uint8_t* private);
+
+/* input: own private key + other party's public key, output: shared secret */
 int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_t* output);
 
 
