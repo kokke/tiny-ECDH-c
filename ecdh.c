@@ -288,7 +288,7 @@ static int bitvec_degree(const bitvec_t x)
   /* Run through rest if count is not multiple of bitsize of DTYPE */
   if (i != 0)
   {
-    uint32_t u32mask = (1 << 31);
+    uint32_t u32mask = ((uint32_t)1 << 31);
     while (((*x) & u32mask) == 0)
     {
       u32mask >>= 1;
