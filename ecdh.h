@@ -50,9 +50,9 @@
 #define NIST_B283  5
 #define NIST_K283  6
 #define NIST_B409  7
-#define NIST_K409  8
+#define NIST_K409  8 /* currently defunct :( */
 #define NIST_B571  9
-#define NIST_K571 10
+#define NIST_K571 10 /* also not working...  */
 
 /* What is the default curve to use? */
 #ifndef ECC_CURVE
