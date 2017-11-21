@@ -19,7 +19,7 @@
   T = S = the new shared secret.
 
 
-  Pseudo-random number generator inspired from: http://burtleburtle.net/bob/rand/smallprng.html
+  Pseudo-random number generator inspired / stolen from: http://burtleburtle.net/bob/rand/smallprng.html
 
 */
 
