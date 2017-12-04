@@ -25,8 +25,6 @@ See [ecdh_example.c](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh_examp
 
 There is no built-in protection from out-of-bounds memory access errors as a result of malicious input. The two functions ecdh_shared_secret() and ecdh_generate_keys() expect inputs of a certain length. See [ecdh.h](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh.h) for clarification.
 
-TODO: Make option to use [co-factor variant of ECDH](https://crypto.stackexchange.com/questions/18222/difference-between-ecdh-with-cofactor-key-and-ecdh-without-cofactor-key) instead of normal, for safe non-ephemeral use.
-
 
 The module allocates no RAM internally and takes up 2.1K ROM when compiled for ARM (1.4K for Thumb but YMMV).
 A keypair requires between 63 and 216 bytes of RAM depending on which curve you choose (i.e. how big the underlying base field is).
@@ -52,3 +50,9 @@ I am using the Free Software Foundation, ARM GCC compiler:
 
 
 All material in this repository is in the public domain.
+
+
+### TODO:
+
+- Make option to use [co-factor variant of ECDH](https://crypto.stackexchange.com/questions/18222/difference-between-ecdh-with-cofactor-key-and-ecdh-without-cofactor-key) instead of normal, for safe non-ephemeral use.
+- Implement ECDSA signing and verifification.
