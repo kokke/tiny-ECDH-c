@@ -58,7 +58,7 @@
  #include <assert.h>
 #endif
 
-/* Use (some) constant-time operations?
+/* Default to a (somewhat) constant-time mode?
    NOTE: The library is _not_ capable of operating in constant-time and leaks information via timing.
          Even if all operations are written const-time-style, it requires the hardware is able to multiply in constant time. 
          Multiplication on ARM Cortex-M processors takes a variable number of cycles depending on the operands...
@@ -67,6 +67,10 @@
   #define CONST_TIME 0
 #endif
 
+/* Default to using ECC_CDH (cofactor multiplication-variation) ? */
+#ifndef ECDH_COFACTOR_VARIANT
+  #define ECDH_COFACTOR_VARIANT 0
+#endif
 
 /******************************************************************************/
 
@@ -84,6 +88,7 @@ typedef bitvec_t scalar_t;
 #if defined (ECC_CURVE) && (ECC_CURVE != 0)
  #if (ECC_CURVE == NIST_K163)
   #define coeff_a 1
+  #define COFACTOR 2
 /* NIST K-163 */
 const gf2elem_t polynomial = { 0x000000c9, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000008 }; 
 const gf2elem_t coeff_b    = { 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 }; 
@@ -94,6 +99,7 @@ const scalar_t  base_order = { 0x99f8a5ef, 0xa2e0cc0d, 0x00020108, 0x00000000, 0
 
  #if (ECC_CURVE == NIST_B163)
   #define coeff_a 1
+  #define COFACTOR 2
 /* NIST B-163 */
 const gf2elem_t polynomial = { 0x000000c9, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000008 }; 
 const gf2elem_t coeff_b    = { 0x4a3205fd, 0x512f7874, 0x1481eb10, 0xb8c953ca, 0x0a601907, 0x00000002 }; 
@@ -104,17 +110,18 @@ const scalar_t  base_order = { 0xa4234c33, 0x77e70c12, 0x000292fe, 0x00000000, 0
 
  #if (ECC_CURVE == NIST_K233)
   #define coeff_a 0
+  #define COFACTOR 4
 /* NIST K-233 */
 const gf2elem_t polynomial = { 0x00000001, 0x00000000, 0x00000400, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000200 };
 const gf2elem_t coeff_b    = { 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 };
 const gf2elem_t base_x     = { 0xefad6126, 0x0a4c9d6e, 0x19c26bf5, 0x149563a4, 0x29f22ff4, 0x7e731af1, 0x32ba853a, 0x00000172 };
 const gf2elem_t base_y     = { 0x56fae6a3, 0x56e0c110, 0xf18aeb9b, 0x27a8cd9b, 0x555a67c4, 0x19b7f70f, 0x537dece8, 0x000001db };
 const scalar_t  base_order = { 0xf173abdf, 0x6efb1ad5, 0xb915bcd4, 0x00069d5b, 0x00000000, 0x00000000, 0x00000000, 0x00000080 };
-
  #endif
 
  #if (ECC_CURVE == NIST_B233)
   #define coeff_a 1
+  #define COFACTOR 2
 /* NIST B-233 */
 const gf2elem_t polynomial = { 0x00000001, 0x00000000, 0x00000400, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000200 }; 
 const gf2elem_t coeff_b    = { 0x7d8f90ad, 0x81fe115f, 0x20e9ce42, 0x213b333b, 0x0923bb58, 0x332c7f8c, 0x647ede6c, 0x00000066 }; 
@@ -125,6 +132,7 @@ const scalar_t  base_order = { 0x03cfe0d7, 0x22031d26, 0xe72f8a69, 0x0013e974, 0
 
  #if (ECC_CURVE == NIST_K283)
   #define coeff_a 0
+  #define COFACTOR 4
 /* NIST K-283 */
 const gf2elem_t polynomial = { 0x000010a1, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x08000000 };
 const gf2elem_t coeff_b    = { 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 }; 
@@ -135,6 +143,7 @@ const scalar_t  base_order = { 0x1e163c61, 0x94451e06, 0x265dff7f, 0x2ed07577, 0
 
  #if (ECC_CURVE == NIST_B283)
   #define coeff_a 1
+  #define COFACTOR 2
 /* NIST B-283 */
 const gf2elem_t polynomial = { 0x000010a1, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x08000000 }; 
 const gf2elem_t coeff_b    = { 0x3b79a2f5, 0xf6263e31, 0xa581485a, 0x45309fa2, 0xca97fd76, 0x19a0303f, 0xa5a4af8a, 0xc8b8596d, 0x027b680a }; 
@@ -145,6 +154,7 @@ const scalar_t  base_order = { 0xefadb307, 0x5b042a7c, 0x938a9016, 0x399660fc, 0
 
  #if (ECC_CURVE == NIST_K409)
   #define coeff_a 0
+  #define COFACTOR 4
 /* NIST K-409 */
 const gf2elem_t polynomial = { 0x00000001, 0x00000000, 0x00800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x02000000 }; 
 const gf2elem_t coeff_b    = { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 }; 
@@ -155,6 +165,7 @@ const scalar_t  base_order = { 0xe01e5fcf, 0x4b5c83b8, 0xe3e7ca5b, 0x557d5ed3, 0
 
  #if (ECC_CURVE == NIST_B409)
   #define coeff_a 1
+  #define COFACTOR 2
 /* NIST B-409 */
 const gf2elem_t polynomial = { 0x00000001, 0x00000000, 0x00800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x02000000 }; 
 const gf2elem_t coeff_b    = { 0x7b13545f, 0x4f50ae31, 0xd57a55aa, 0x72822f6c, 0xa9a197b2, 0xd6ac27c8, 0x4761fa99, 0xf1f3dd67, 0x7fd6422e, 0x3b7b476b, 0x5c4b9a75, 0xc8ee9feb, 0x0021a5c2 }; 
@@ -165,6 +176,7 @@ const scalar_t  base_order = { 0xd9a21173, 0x8164cd37, 0x9e052f83, 0x5fa47c3c, 0
 
  #if (ECC_CURVE == NIST_K571)
   #define coeff_a 0
+  #define COFACTOR 4
 /* NIST K-571 */
 const gf2elem_t polynomial = { 0x00000425, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x08000000 }; 
 const gf2elem_t coeff_b    = { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 }; 
@@ -175,6 +187,7 @@ const scalar_t  base_order = { 0x637c1001, 0x5cfe778f, 0x1e91deb4, 0xe5d63938, 0
 
  #if (ECC_CURVE == NIST_B571)
   #define coeff_a 1
+  #define COFACTOR 2
 /* NIST B-571 */
 const gf2elem_t polynomial = { 0x00000425, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x08000000 }; 
 const gf2elem_t coeff_b    = { 0x2955727a, 0x7ffeff7f, 0x39baca0c, 0x520e4de7, 0x78ff12aa, 0x4afd185a, 0x56a66e29, 0x2be7ad67, 0x8efa5933, 0x84ffabbd, 0x4a9a18ad, 0xcd6ba8ce, 0xcb8ceff1, 0x5c6a97ff, 0xb7f3d62f, 0xde297117, 0x2221f295, 0x02f40e7e }; 
@@ -757,6 +770,16 @@ int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_
     /* Multiply other side's public key with own private key */
     gf2point_mul((uint32_t*)output,(uint32_t*)(output + BITVEC_NBYTES), (const uint32_t*)private);
 
+    /* Multiply outcome by cofactor if using CDH-variant: */
+#if defined(ECDH_COFACTOR_VARIANT) && (ECDH_COFACTOR_VARIANT == 1)
+ #if   (COFACTOR == 2)
+    gf2point_double((uint32_t*)output, (uint32_t*)(output + BITVEC_NBYTES));
+ #elif (COFACTOR == 4)
+    gf2point_double((uint32_t*)output, (uint32_t*)(output + BITVEC_NBYTES));
+    gf2point_double((uint32_t*)output, (uint32_t*)(output + BITVEC_NBYTES));
+ #endif
+#endif
+    
     return 1;
   }
   else
