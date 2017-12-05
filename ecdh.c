@@ -58,7 +58,11 @@
  #include <assert.h>
 #endif
 
-/* Use (some) constant-time operations? */
+/* Use (some) constant-time operations?
+   NOTE: The library is _not_ capable of operating in constant-time and leaks information via timing.
+         Even if all operations are written const-time-style, it requires the hardware is able to multiply in constant time. 
+         Multiplication on ARM Cortex-M processors takes a variable number of cycles depending on the operands...
+*/
 #ifndef CONST_TIME
   #define CONST_TIME 0
 #endif
