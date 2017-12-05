@@ -9,6 +9,9 @@ Description from Wikipedia:
 
 You can choose between 10 standard NIST curves of different sizes. 5 pseudo-random curves and 5 Koblitz curves providing from 80 to 256 bits symmetrically equivalent security.  See [ecdh.h](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh.h) for clarification.
 
+You can define the macro `ECDH_COFACTOR_VARIANT` in [ecdh.c](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh.c) to enable the [co-factor variant of ECDH](https://crypto.stackexchange.com/questions/18222/difference-between-ecdh-with-cofactor-key-and-ecdh-without-cofactor-key) for safe non-ephemeral use.
+
+
 The API is very simple and looks like this (I am using C99 `<stdint.h>`-style annotated types):
 
 ```C
@@ -21,7 +24,6 @@ int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_
 
 You need to provide random data for the private key yourself, for the key generation process.
 See [ecdh_example.c](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh_example.c) for an example of how to use the library.
-
 
 There is no built-in protection from out-of-bounds memory access errors as a result of malicious input. The two functions ecdh_shared_secret() and ecdh_generate_keys() expect inputs of a certain length. See [ecdh.h](https://github.com/kokke/tiny-ECDH-c/blob/master/ecdh.h) for clarification.
 
@@ -54,5 +56,4 @@ All material in this repository is in the public domain.
 
 ### TODO:
 
-- Make option to use [co-factor variant of ECDH](https://crypto.stackexchange.com/questions/18222/difference-between-ecdh-with-cofactor-key-and-ecdh-without-cofactor-key) instead of normal, for safe non-ephemeral use.
 - Implement ECDSA signing and verifification.
