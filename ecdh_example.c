@@ -119,8 +119,8 @@ static void ecdh_demo(void)
 }
 
 
-
-void ecdsa_demo()
+/* WARNING: This is not working correctly. ECDSA is not working... */
+void ecdsa_broken()
 {
   static uint8_t  prv[ECC_PRV_KEY_SIZE];
   static uint8_t  pub[ECC_PUB_KEY_SIZE];
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
   for (i = 0; i < ncycles; ++i)
   {
     ecdh_demo();
-    ecdsa_demo();
+    ecdsa_broken();
   }
 
   return 0;
