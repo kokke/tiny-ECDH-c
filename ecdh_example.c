@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "ecdh.h"
 
 
@@ -119,6 +120,36 @@ static void ecdh_demo(void)
 
 
 
+void ecdsa_demo()
+{
+  static uint8_t  prv[ECC_PRV_KEY_SIZE];
+  static uint8_t  pub[ECC_PUB_KEY_SIZE];
+  static uint8_t  msg[ECC_PRV_KEY_SIZE];
+  static uint8_t  signature[ECC_PUB_KEY_SIZE];
+  static uint8_t  k[ECC_PRV_KEY_SIZE];
+  uint32_t i;
+
+  srand(time(0));
+  srand(42);
+
+  for (i = 0; i < ECC_PRV_KEY_SIZE; ++i)
+  {
+    prv[i] = rand();
+    msg[i] = prv[i] ^ rand();
+    k[i] = rand();
+  }
+
+/* int ecdsa_sign(const uint8_t* private, const uint8_t* hash, uint8_t* random_k, uint8_t* signature);
+   int ecdsa_verify(const uint8_t* public, const uint8_t* hash, uint8_t* signature);                          */
+
+  ecdh_generate_keys(pub, prv);
+  /* No asserts - ECDSA functionality is broken... */
+  ecdsa_sign((const uint8_t*)prv, msg, k, signature);
+  ecdsa_verify((const uint8_t*)pub, msg, (const uint8_t*)signature); /* fails... */
+}
+
+
+
 int main(int argc, char* argv[])
 {
   int i;
@@ -132,6 +163,7 @@ int main(int argc, char* argv[])
   for (i = 0; i < ncycles; ++i)
   {
     ecdh_demo();
+    ecdsa_demo();
   }
 
   return 0;
