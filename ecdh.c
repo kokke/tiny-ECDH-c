@@ -790,3 +790,188 @@ int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_
 
 
 
+/* ECDSA is broken :( ... */
+int ecdsa_sign(const uint8_t* private, uint8_t* hash, uint8_t* random_k, uint8_t* signature)
+{
+  /*
+     1) calculate e = HASH(m)
+     2) let z be the Ln leftmost bits of e, where Ln is the bit length of the group order n
+     3) Select a cryptographically secure random integer k from [1, n-1]
+     4) Calculate the curve point (x1, y1) = k * G
+     5) Calculate r = x1 mod n - if (r == 0) goto 3
+     6) Calculate s = inv(k) * (z + r * d) mod n - if (s == 0) goto 3
+     7) The signature is the pair (r, s)
+  */
+  assert(private != 0);
+  assert(hash != 0);
+  assert(random_k != 0);
+  assert(signature != 0);
+
+  int success = 0;
+
+  if (    (bitvec_degree((uint32_t*)private) >= (CURVE_DEGREE / 2))
+       && !bitvec_is_zero((uint32_t*)random_k) )
+  {
+    gf2elem_t r, s, z, k;
+
+    bitvec_set_zero(r);
+    bitvec_set_zero(s);
+    bitvec_copy(z, (uint32_t*)hash);
+
+    /* 1 + 2 */
+    int nbits = bitvec_degree(base_order);
+    int i;
+    for (i = (nbits - 1); i < BITVEC_NBITS; ++i)
+    {
+      bitvec_clr_bit(z, i);
+    }
+
+    /* 3 */
+    bitvec_copy(k, (uint32_t*)random_k);
+
+    /* 4 */
+    gf2point_copy(r, s, base_x, base_y);
+    gf2point_mul(r, s, k);
+
+    /* 5 */
+    if (!bitvec_is_zero(r))
+    {
+      /* 6) s = inv(k) * (z + (r * d)) mod n ==> if (s == 0) goto 3 **/
+      gf2field_inv(s, k);                     /* s = inv(k) */
+      gf2field_mul(r, r, (uint32_t*)private); /* r = (r * d) */
+      gf2field_add(r, r, z);                  /* r = z + (r * d) */
+
+      nbits = bitvec_degree(r); /* r = r mod n */
+      for (i = (nbits - 1); i < BITVEC_NBITS; ++i)
+      {
+        printf("reduction r\n");
+        bitvec_clr_bit(r, i);
+      }
+      
+      gf2field_mul(s, s, r);                  /* s = inv(k) * (z * (r * d)) */
+
+      nbits = bitvec_degree(s); /* s = s mod n */
+      for (i = (nbits - 1); i < BITVEC_NBITS; ++i)
+      {
+        printf("reduction s\n");
+        bitvec_clr_bit(s, i);
+      }
+
+      if (!bitvec_is_zero(s))
+      {
+        bitvec_copy((uint32_t*)signature, r);
+        bitvec_copy((uint32_t*)(signature + ECC_PRV_KEY_SIZE), s);
+        success = 1;
+      }
+    }
+  }
+  return success;
+}
+
+
+int ecdsa_verify(const uint8_t* public, uint8_t* hash, const uint8_t* signature)
+{
+  /*
+    1) Verify that (r,s) are in [1, n-1]
+    2) e = HASH(m)
+    3) z = Ln leftmost bits of e
+    4) w = inv(s) mod n
+    5) u1 = (z * w) mod n
+       u2 = (r * w) mod n
+    6) (x,y) = (u1 * G) + (u2 * public)
+    7) Signature is valid if r == x mod n && (x,y) != (0,0)
+  */
+  assert(public != 0);
+  assert(hash != 0);
+  assert(signature != 0);
+
+  int success = 0;
+
+  gf2elem_t r, s;
+  bitvec_copy(r, (uint32_t*)(signature));
+  bitvec_copy(s, (uint32_t*)(signature + ECC_PRV_KEY_SIZE));
+
+  if (    !bitvec_is_zero(s)
+       && !bitvec_is_zero(r))
+  {
+    gf2elem_t x1, y1, u1, u2, w, z;
+
+    /* 3) z = Ln leftmost bits of e */
+    bitvec_copy(z, (uint32_t*)hash); /* r,s,z are set */
+    uint32_t nbits = bitvec_degree(base_order);
+    uint32_t i;
+    for (i = (nbits - 1); i < BITVEC_NBITS; ++i)
+    {
+      bitvec_clr_bit(z, i);
+    }
+    
+    /* 4) w = inv(s) mod n */
+    gf2field_inv(w, s); /* w = inv(s) */
+    /* Modulo reduction polynomial if degree(tmp) > CURVE_DEGREE */
+    if (bitvec_get_bit(w, CURVE_DEGREE))
+    {
+      printf("reduction on w\n");
+      gf2field_add(w, w, polynomial);
+    }
+
+    /* 5) u1 = zw mod n, u2 = rw mod n*/
+    gf2field_mul(u1, z, w); /* u1 = z * w */
+    /* Modulo reduction polynomial if degree(tmp) > CURVE_DEGREE */
+    if (bitvec_get_bit(u1, CURVE_DEGREE))
+    {
+      printf("reduction on u1\n");
+      gf2field_add(u1, u1, polynomial);
+    }
+    gf2field_mul(u2, r, w); /* u2 = r * w */
+    /* Modulo reduction polynomial if degree(tmp) > CURVE_DEGREE */
+    if (bitvec_get_bit(u2, CURVE_DEGREE))
+    {
+      printf("reduction on u2\n");
+      gf2field_add(u2, u2, polynomial);
+    }
+
+    /* 6) (x,y) = (u1 * G) + (u2 * public) */
+    bitvec_copy(x1, base_x);
+    bitvec_copy(y1, base_y);
+    gf2field_mul(u1, x1, y1);  /* u1 * G */
+
+    bitvec_copy(w, (uint32_t*)(public));
+    bitvec_copy(z, (uint32_t*)(public + ECC_PRV_KEY_SIZE));
+    gf2field_mul(u2, w, z); /* u2 * Q */
+
+    
+    gf2point_add(x1, y1, w, z);
+    if (bitvec_get_bit(x1, CURVE_DEGREE))
+    {
+      printf("reduction on x1\n");
+      gf2field_add(x1, x1, polynomial);
+    }
+
+    success = bitvec_equal(r, x1);
+
+    if (!success)
+    {
+      printf("x = '");
+      for (i = 0; i < BITVEC_NWORDS; ++i)
+      {
+        printf("%.08x", x1[i]);
+      }
+      printf("' [%u]\n", i);
+      printf("r = '");
+      for (i = 0; i < BITVEC_NWORDS; ++i)
+      {
+        printf("%.08x", r[i]);
+      }
+      printf("' [%u]\n", i);
+    }
+  }
+  else
+  {
+    printf("(s or r) == zero\n");
+  }
+
+  return success;
+}
+
+
+
