@@ -207,12 +207,12 @@ const scalar_t  base_order = { 0x2fe84e47, 0x8382e9bb, 0x5174d66e, 0x161de93d, 0
 /* some basic bit-manipulation routines that act on bit-vectors follow */
 static int bitvec_get_bit(const bitvec_t x, const uint32_t idx)
 {
-  return ((x[idx / 32] >> (idx & 31) & 1));
+  return ((x[idx / 32U] >> (idx & 31U) & 1U));
 }
 
 static void bitvec_clr_bit(bitvec_t x, const uint32_t idx)
 {
-  x[idx / 32] &= ~(1 << (idx & 31));
+  x[idx / 32U] &= ~(1U << (idx & 31U));
 }
 
 static void bitvec_copy(bitvec_t x, const bitvec_t y)
