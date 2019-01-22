@@ -62,10 +62,10 @@
 #if defined(ECC_CURVE) && (ECC_CURVE != 0)
  #if   (ECC_CURVE == NIST_K163) || (ECC_CURVE == NIST_B163)
   #define CURVE_DEGREE       163
-  #define ECC_PRV_KEY_SIZE   21
+  #define ECC_PRV_KEY_SIZE   24
  #elif (ECC_CURVE == NIST_K233) || (ECC_CURVE == NIST_B233)
   #define CURVE_DEGREE       233
-  #define ECC_PRV_KEY_SIZE   30
+  #define ECC_PRV_KEY_SIZE   32
  #elif (ECC_CURVE == NIST_K283) || (ECC_CURVE == NIST_B283)
   #define CURVE_DEGREE       283
   #define ECC_PRV_KEY_SIZE   36
