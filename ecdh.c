@@ -724,13 +724,13 @@ static int gf2point_on_curve(const gf2elem_t x, const gf2elem_t y)
 
 
 /* NOTE: private should contain random data a-priori! */
-int ecdh_generate_keys(uint8_t* public, uint8_t* private)
+int ecdh_generate_keys(uint8_t* public_key, uint8_t* private_key)
 {
   /* Get copy of "base" point 'G' */
-  gf2point_copy((uint32_t*)public, (uint32_t*)(public + BITVEC_NBYTES), base_x, base_y);
+  gf2point_copy((uint32_t*)public_key, (uint32_t*)(public_key + BITVEC_NBYTES), base_x, base_y);
 
   /* Abort key generation if random number is too small */
-  if (bitvec_degree((uint32_t*)private) < (CURVE_DEGREE / 2))
+  if (bitvec_degree((uint32_t*)private_key) < (CURVE_DEGREE / 2))
   {
     return 0;
   }
@@ -742,11 +742,11 @@ int ecdh_generate_keys(uint8_t* public, uint8_t* private)
 
     for (i = (nbits - 1); i < (BITVEC_NWORDS * 32); ++i)
     {
-      bitvec_clr_bit((uint32_t*)private, i);
+      bitvec_clr_bit((uint32_t*)private_key, i);
     }
 
     /* Multiply base-point with scalar (private-key) */
-    gf2point_mul((uint32_t*)public, (uint32_t*)(public + BITVEC_NBYTES), (uint32_t*)private);
+    gf2point_mul((uint32_t*)public_key, (uint32_t*)(public_key + BITVEC_NBYTES), (uint32_t*)private_key);
 
     return 1;
   }
@@ -754,7 +754,7 @@ int ecdh_generate_keys(uint8_t* public, uint8_t* private)
 
 
 
-int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_t* output)
+int ecdh_shared_secret(const uint8_t* private_key, const uint8_t* others_pub, uint8_t* output)
 {
   /* Do some basic validation of other party's public key */
   if (    !gf2point_is_zero ((uint32_t*)others_pub, (uint32_t*)(others_pub + BITVEC_NBYTES))
@@ -768,7 +768,7 @@ int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_
     }
 
     /* Multiply other side's public key with own private key */
-    gf2point_mul((uint32_t*)output,(uint32_t*)(output + BITVEC_NBYTES), (const uint32_t*)private);
+    gf2point_mul((uint32_t*)output,(uint32_t*)(output + BITVEC_NBYTES), (const uint32_t*)private_key);
 
     /* Multiply outcome by cofactor if using ECC CDH-variant: */
 #if defined(ECDH_COFACTOR_VARIANT) && (ECDH_COFACTOR_VARIANT == 1)
@@ -789,9 +789,8 @@ int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_
 }
 
 
-
 /* ECDSA is broken :( ... */
-int ecdsa_sign(const uint8_t* private, uint8_t* hash, uint8_t* random_k, uint8_t* signature)
+int ecdsa_sign(const uint8_t* private_key, uint8_t* hash, uint8_t* random_k, uint8_t* signature)
 {
   /*
      1) calculate e = HASH(m)
@@ -802,14 +801,14 @@ int ecdsa_sign(const uint8_t* private, uint8_t* hash, uint8_t* random_k, uint8_t
      6) Calculate s = inv(k) * (z + r * d) mod n - if (s == 0) goto 3
      7) The signature is the pair (r, s)
   */
-  assert(private != 0);
+  assert(private_key != 0);
   assert(hash != 0);
   assert(random_k != 0);
   assert(signature != 0);
 
   int success = 0;
 
-  if (    (bitvec_degree((uint32_t*)private) >= (CURVE_DEGREE / 2))
+  if (    (bitvec_degree((uint32_t*)private_key) >= (CURVE_DEGREE / 2))
        && !bitvec_is_zero((uint32_t*)random_k) )
   {
     gf2elem_t r, s, z, k;
@@ -838,7 +837,7 @@ int ecdsa_sign(const uint8_t* private, uint8_t* hash, uint8_t* random_k, uint8_t
     {
       /* 6) s = inv(k) * (z + (r * d)) mod n ==> if (s == 0) goto 3 **/
       gf2field_inv(s, k);                     /* s = inv(k) */
-      gf2field_mul(r, r, (uint32_t*)private); /* r = (r * d) */
+      gf2field_mul(r, r, (uint32_t*)private_key); /* r = (r * d) */
       gf2field_add(r, r, z);                  /* r = z + (r * d) */
 
       nbits = bitvec_degree(r); /* r = r mod n */
@@ -869,7 +868,7 @@ int ecdsa_sign(const uint8_t* private, uint8_t* hash, uint8_t* random_k, uint8_t
 }
 
 
-int ecdsa_verify(const uint8_t* public, uint8_t* hash, const uint8_t* signature)
+int ecdsa_verify(const uint8_t* public_key, uint8_t* hash, const uint8_t* signature)
 {
   /*
     1) Verify that (r,s) are in [1, n-1]
@@ -881,7 +880,7 @@ int ecdsa_verify(const uint8_t* public, uint8_t* hash, const uint8_t* signature)
     6) (x,y) = (u1 * G) + (u2 * public)
     7) Signature is valid if r == x mod n && (x,y) != (0,0)
   */
-  assert(public != 0);
+  assert(public_key != 0);
   assert(hash != 0);
   assert(signature != 0);
 
@@ -935,8 +934,8 @@ int ecdsa_verify(const uint8_t* public, uint8_t* hash, const uint8_t* signature)
     bitvec_copy(y1, base_y);
     gf2field_mul(u1, x1, y1);  /* u1 * G */
 
-    bitvec_copy(w, (uint32_t*)(public));
-    bitvec_copy(z, (uint32_t*)(public + ECC_PRV_KEY_SIZE));
+    bitvec_copy(w, (uint32_t*)(public_key));
+    bitvec_copy(z, (uint32_t*)(public_key + ECC_PRV_KEY_SIZE));
     gf2field_mul(u2, w, z); /* u2 * Q */
 
     
