@@ -43,6 +43,10 @@
 /* for size-annotated integer types: uint8_t, uint32_t etc. */
 #include <stdint.h> 
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #define NIST_B163  1
 #define NIST_K163  2
 #define NIST_B233  3
@@ -87,19 +91,22 @@
 
 
 /* NOTE: assumes private is filled with random data before calling */
-int ecdh_generate_keys(uint8_t* public, uint8_t* private);
+int ecdh_generate_keys(uint8_t* public_key, uint8_t* private_key);
 
 /* input: own private key + other party's public key, output: shared secret */
-int ecdh_shared_secret(const uint8_t* private, const uint8_t* others_pub, uint8_t* output);
+int ecdh_shared_secret(const uint8_t* private_key, const uint8_t* others_pub, uint8_t* output);
 
 
 /* Broken :( .... */
-int ecdsa_sign(const uint8_t* private, uint8_t* hash, uint8_t* random_k, uint8_t* signature);
-int ecdsa_verify(const uint8_t* public, uint8_t* hash, const uint8_t* signature);
+int ecdsa_sign(const uint8_t* private_key, uint8_t* hash, uint8_t* random_k, uint8_t* signature);
+int ecdsa_verify(const uint8_t* public_key, uint8_t* hash, const uint8_t* signature);
 
 
 /******************************************************************************/
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* #ifndef _ECDH_H__ */
 
