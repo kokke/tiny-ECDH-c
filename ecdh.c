@@ -36,6 +36,7 @@
     https://www.ietf.org/rfc/rfc4492.txt 
 */
 
+#include <stdio.h>
 #include <stdint.h>
 #include "ecdh.h"
 
